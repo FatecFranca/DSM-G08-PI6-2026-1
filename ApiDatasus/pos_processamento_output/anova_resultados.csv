@@ -1,0 +1,9 @@
+Feature,Label,F_stat,p_valor,eta_sq,sig
+cnes_hospitais,Hospitais (CNES),2426361.4762,0.0,0.9276,***
+nu_imc,IMC Atual,300613.6768,0.0,0.6134,***
+nu_peso,Peso (kg),235196.1615,0.0,0.5538,***
+nu_imc_pre_gestacional,IMC Pré-Gestacional,206306.0113,0.0,0.5213,***
+ganho_imc,Ganho de IMC,5669.8237,0.0,0.0291,***
+log_taxa_sifilis_gest,Log Taxa Sífilis,720.1121,7.11306206845e-313,0.0038,***
+nu_altura,Altura (m),185.21,4.014328766986611e-81,0.001,***
+escolaridade,Escolaridade,40.6213,2.2923610258703013e-18,0.0002,***

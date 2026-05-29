@@ -1,0 +1,68 @@
+# =============================================================================
+# Maternar — .gitignore
+# =============================================================================
+
+# ── Credenciais e configuração local ─────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example         # templates de exemplo sempre sobem
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# ── Node.js ───────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/.pnp
+.pnp.js
+/out-tsc
+/tmp
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.iml
+*.swp
+*.swo
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Dados brutos DATASUS (grandes, regeneráveis pelo pipeline) ────────────────
+ApiDatasus/dados_datasus/SISVAN/
+ApiDatasus/dados_datasus/logs/
+ApiDatasus/dados_datasus/*.dbf
+ApiDatasus/dados_datasus/*.dbc
+ApiDatasus/dados_datasus/*ipynb
+
+# ── Arquivos de dados grandes (parquet) ───────────────────────────────────────
+*.parquet
+
+# ── Modelos ML intermediários ─────────────────────────────────────────────────
+# Todos os .pkl são excluídos, exceto os de produção em flask_api/models/
+*.pkl
+!ApiDatasus/flask_api/models/*.pkl
+
+# ── Saídas geradas pelo pipeline (regeneráveis) ───────────────────────────────
+ApiDatasus/clustering_output/gestante_clusterizada.parquet
+ApiDatasus/clustering_research_output/gestante_todos_clusters.parquet
+
+# ── Notebooks executados (têm outputs grandes embutidos) ─────────────────────
+*_executed.ipynb
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+ApiDatasus/flask_api/.env

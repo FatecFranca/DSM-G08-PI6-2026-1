@@ -1,0 +1,4 @@
+Feature,Label,chi2,df,p_valor,Cramers_V,sig
+raca_cor,Raça/Cor,2657.9377,8,0.0,0.0592,***
+estado_nutricional_cod,Estado Nutricional,304122.546,8,0.0,0.6371,***
+escolaridade,Escolaridade (ord.),456.7293,8,1.3364301973344256e-93,0.0245,***
