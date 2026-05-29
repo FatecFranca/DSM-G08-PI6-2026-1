@@ -136,6 +136,7 @@ def classificar_gestante(dados: dict, municipio_features: dict) -> dict:
 Classifica uma gestante e retorna seu cluster de risco.
 
 **Request Body:**
+
 ```json
 {
   "nu_peso": 72.0,
@@ -149,6 +150,7 @@ Classifica uma gestante e retorna seu cluster de risco.
 ```
 
 **Response (200):**
+
 ```json
 {
   "cluster_id": 1,
@@ -174,7 +176,7 @@ Classifica uma gestante e retorna seu cluster de risco.
 ### `GET /health`
 
 ```json
-{"status": "ok", "modelo": "kmeans_k3", "K": 3, "silhouette": 0.2873}
+{ "status": "ok", "modelo": "kmeans_k3", "K": 3, "silhouette": 0.2873 }
 ```
 
 ### `GET /clusters`
@@ -185,14 +187,15 @@ Retorna os 3 perfis de cluster com métricas dos centroides.
 
 ## 5. Endpoints da API NestJS
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `POST` | `/api/auth/register` | Cadastro de nova usuária |
-| `POST` | `/api/auth/login` | Autenticação JWT |
-| `POST` | `/api/quiz/submit` | Envio do questionário → classificação |
-| `GET` | `/api/quiz/history` | Histórico de classificações da usuária |
-| `GET` | `/api/tips/:cluster_id` | Dicas por cluster (0, 1 ou 2) |
-| `GET` | `/api/clusters` | Informações sobre os 3 clusters |
+| Método | Rota                                     | Descrição                                         |
+| ------ | ---------------------------------------- | ------------------------------------------------- |
+| `POST` | `/users/register`                        | Cadastro de nova usuária                          |
+| `POST` | `/auth/login`                            | Autenticação JWT                                  |
+| `GET`  | `/users/profile`                         | Consulta de perfil do usuário autenticado         |
+| `POST` | `/pregnancy/create`                      | Criação de um novo ciclo gestacional              |
+| `GET`  | `/pregnancy`                             | Retorna o histórico de gestações da usuária       |
+| `POST` | `/questionnaires/:pregnancyId/submit`    | Submissão de check-in / questionário              |
+| `GET`  | `/questionnaires/pregnancy/:pregnancyId` | Histórico de respostas/classificações da gestação |
 
 ---
 
@@ -295,27 +298,27 @@ POSTGRES_URL=postgresql://user:pass@db:5432/maternar
 
 ### Cluster 0 — Obesidade Gestacional
 
-| Categoria | Recomendação |
-|-----------|-------------|
-| Nutricao | Encaminhar para nutricionista especializado em gestação |
-| Consultas | Monitoramento intensivo: consultas a cada 2-3 semanas |
-| Exames | Rastreamento de pré-eclâmpsia e diabetes gestacional |
-| Alertas | Risco elevado de parto cesáreo e complicações metabólicas |
+| Categoria | Recomendação                                              |
+| --------- | --------------------------------------------------------- |
+| Nutricao  | Encaminhar para nutricionista especializado em gestação   |
+| Consultas | Monitoramento intensivo: consultas a cada 2-3 semanas     |
+| Exames    | Rastreamento de pré-eclâmpsia e diabetes gestacional      |
+| Alertas   | Risco elevado de parto cesáreo e complicações metabólicas |
 
 ### Cluster 1 — Eutrofia / Baixo Peso
 
-| Categoria | Recomendação |
-|-----------|-------------|
-| Nutricao | Orientação nutricional básica; monitorar ganho de peso |
-| Consultas | Garantir mínimo de 6 consultas pré-natal (padrão SUS) |
-| Exames | Hemograma, glicemia, VDRL, anti-HIV (rotina) |
-| Alertas | Verificar se peso pré-gestacional está em zona de baixo peso |
+| Categoria | Recomendação                                                 |
+| --------- | ------------------------------------------------------------ |
+| Nutricao  | Orientação nutricional básica; monitorar ganho de peso       |
+| Consultas | Garantir mínimo de 6 consultas pré-natal (padrão SUS)        |
+| Exames    | Hemograma, glicemia, VDRL, anti-HIV (rotina)                 |
+| Alertas   | Verificar se peso pré-gestacional está em zona de baixo peso |
 
 ### Cluster 2 — Acesso Diferenciado
 
-| Categoria | Recomendação |
-|-----------|-------------|
-| Nutricao | Avaliação nutricional completa (acesso a centros especializados) |
-| Consultas | Verificar se está vinculada a maternidade de referência |
-| Exames | Atenção ao VDRL — município com taxa de sífilis mais elevada |
-| Alertas | Pode necessitar de encaminhamento para pré-natal de alto risco |
+| Categoria | Recomendação                                                     |
+| --------- | ---------------------------------------------------------------- |
+| Nutricao  | Avaliação nutricional completa (acesso a centros especializados) |
+| Consultas | Verificar se está vinculada a maternidade de referência          |
+| Exames    | Atenção ao VDRL — município com taxa de sífilis mais elevada     |
+| Alertas   | Pode necessitar de encaminhamento para pré-natal de alto risco   |

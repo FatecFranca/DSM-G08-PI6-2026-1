@@ -11,6 +11,7 @@
 O backend do Maternar é uma API REST desenvolvida com **NestJS v11** seguindo os princípios de **Clean Architecture** com separação em camadas: HTTP (Controllers/DTOs), Application (Services) e Infraestrutura (Database/Integrations).
 
 A API é responsável por:
+
 - Registro e autenticação de gestantes
 - Gestão de perfil com enriquecimento geográfico via CEP
 - Persistência de dados via PostgreSQL (Prisma ORM)
@@ -49,6 +50,18 @@ src/
 │   │   └── user.dto.ts              # UserDto, UserProfileDto
 │   └── user.module.ts
 │
+├── pregnancies/                     # Módulo de Gestações
+│   ├── application/
+│   │   └── pregnancy.service.ts
+│   └── http/
+│       └── pregnancy.controller.ts, pregnancy.dto.ts
+│
+├── questionnaires/                  # Módulo de Check-ins (Questionários)
+│   ├── application/
+│   │   └── questionnaire.service.ts
+│   └── http/
+│       └── questionnaire.controller.ts, questionnaire.dto.ts
+│
 ├── integrations/
 │   └── viacep/                      # Integração ViaCEP
 │       ├── viacep.service.ts        # Fetch com timeout (5s) + tratamento de erros
@@ -76,6 +89,7 @@ src/
 Autentica uma gestante com email e senha.
 
 **Request:**
+
 ```json
 {
   "email": "maria@exemplo.com",
@@ -84,6 +98,7 @@ Autentica uma gestante com email e senha.
 ```
 
 **Response 200:**
+
 ```json
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -92,6 +107,7 @@ Autentica uma gestante com email e senha.
 ```
 
 **Response 401:**
+
 ```json
 {
   "error": {
@@ -108,12 +124,14 @@ Autentica uma gestante com email e senha.
 #### `POST /users/register`
 
 Cria uma nova conta de gestante. Internamente:
+
 1. Verifica unicidade do e-mail
 2. Busca dados de endereço via ViaCEP (tolerante a falhas)
 3. Gera hash bcrypt da senha
 4. Persiste usuário e localização em transação atômica (Prisma nested write)
 
 **Request:**
+
 ```json
 {
   "name": "Maria Silva",
@@ -127,6 +145,7 @@ Cria uma nova conta de gestante. Internamente:
 **Campos opcionais no schema (não expostos no DTO atual):** `phone`, `height`, `weight`, `previousPregnancies`, `educationLevel`, `hadPreviousComplication`
 
 **Response 201:**
+
 ```json
 {
   "message": "User created successfully"
@@ -134,7 +153,7 @@ Cria uma nova conta de gestante. Internamente:
 ```
 
 **Response 409:** Email já cadastrado  
-**Response 400:** CEP inválido ou não encontrado  
+**Response 400:** CEP inválido ou não encontrado
 
 ---
 
@@ -143,6 +162,7 @@ Cria uma nova conta de gestante. Internamente:
 Retorna o perfil da gestante autenticada. Requer `Authorization: Bearer <token>`.
 
 **Response 200:**
+
 ```json
 {
   "id": "187a903a-2256-4b71-b76a-1d92d4c15b03",
@@ -156,7 +176,50 @@ Retorna o perfil da gestante autenticada. Requer `Authorization: Bearer <token>`
 
 ---
 
-### 3.3 Envelope de Erro Padrão
+### 3.3 Gestações
+
+#### `POST /pregnancy/create`
+
+Cria um novo ciclo gestacional para a usuária autenticada. Se `dumStartDate` for enviado, a API calcula automaticamente a data prevista do parto (DPP) somando 280 dias.
+
+**Request:**
+
+```json
+{
+  "dumStartDate": "2026-03-01T00:00:00.000Z"
+}
+```
+
+#### `GET /pregnancy`
+
+Retorna a lista de todas as gestações cadastradas pela usuária, ordenadas da mais recente para a mais antiga.
+
+---
+
+### 3.4 Questionários (Check-ins)
+
+#### `POST /questionnaires/:pregnancyId/submit`
+
+Registra um check-in de saúde vinculado a uma gestação específica. Atualmente, os dados são salvos parcialmente enquanto aguardam a integração com o worker de Inteligência Artificial para definição do `clusterId`.
+
+**Request (Obrigatório):**
+
+```json
+{
+  "currentWeight": 65.2,
+  "currentAppointments": 1,
+  "hadNewComplications": false,
+  "antiHivFlag": 1
+}
+```
+
+#### `GET /questionnaires/pregnancy/:pregnancyId`
+
+Retorna todo o histórico de questionários respondidos para uma gestação específica, permitindo ao app móvel desenhar gráficos de evolução de peso e histórico de acompanhamento.
+
+---
+
+### 3.5 Envelope de Erro Padrão
 
 Todos os erros retornam no formato:
 
@@ -169,13 +232,13 @@ Todos os erros retornam no formato:
 }
 ```
 
-| Código | HTTP | Cenário |
-|--------|------|---------|
-| `INVALID_CREDENTIALS` | 401 | Email ou senha incorretos |
-| `UNAUTHORIZED` | 401 | Token ausente ou inválido |
-| `TOKEN_EXPIRED` | 401 | Token JWT expirado |
-| `INVALID_ZIP_CODE` | 400 | CEP com formato inválido ou não encontrado |
-| `VIACEP_UNAVAILABLE` | 503 | API ViaCEP indisponível (não bloqueia cadastro) |
+| Código                | HTTP | Cenário                                         |
+| --------------------- | ---- | ----------------------------------------------- |
+| `INVALID_CREDENTIALS` | 401  | Email ou senha incorretos                       |
+| `UNAUTHORIZED`        | 401  | Token ausente ou inválido                       |
+| `TOKEN_EXPIRED`       | 401  | Token JWT expirado                              |
+| `INVALID_ZIP_CODE`    | 400  | CEP com formato inválido ou não encontrado      |
+| `VIACEP_UNAVAILABLE`  | 503  | API ViaCEP indisponível (não bloqueia cadastro) |
 
 ---
 
@@ -183,33 +246,35 @@ Todos os erros retornam no formato:
 
 ### 4.1 Tabela `users`
 
-| Coluna | Tipo | Obrigatório | Descrição |
-|--------|------|------------|-----------|
-| `id` | UUID | Sim | PK gerado automaticamente |
-| `name` | String | Sim | Nome completo |
-| `email` | String (unique) | Sim | E-mail de login |
-| `password` | String | Sim | Hash bcrypt |
-| `phone` | String? | Não | Telefone com DDD |
-| `height` | Decimal? | Não | Altura em metros |
-| `weight` | Decimal? | Não | Peso em kg |
-| `previous_pregnancies` | Int? | Não | Gestações anteriores |
-| `education_level` | Int? | Não | Nível de escolaridade (1-5) |
-| `zip_code` | String | Sim | CEP (somente dígitos) |
-| `had_previous_complication` | Boolean? | Não | Complicação anterior |
-| `birth_date` | Date | Sim | Data prevista do parto |
-| `created_at` | DateTime | Sim | Criação do registro |
+| Coluna                      | Tipo            | Obrigatório | Descrição                      |
+| --------------------------- | --------------- | ----------- | ------------------------------ |
+| `id`                        | UUID            | Sim         | PK gerado automaticamente      |
+| `name`                      | String          | Sim         | Nome completo                  |
+| `email`                     | String (unique) | Sim         | E-mail de login                |
+| `password`                  | String          | Sim         | Hash bcrypt                    |
+| `phone`                     | String?         | Não         | Telefone com DDD               |
+| `height`                    | Decimal?        | Não         | Altura em metros               |
+| `pre_gestational_weight`    | Decimal?        | Não         | Peso antes da gestação em kg   |
+| `previous_pregnancies`      | Int?            | Não         | Gestações anteriores           |
+| `education_level`           | Int             | Sim         | Nível de escolaridade (1-5)    |
+| `race_color`                | Int             | Sim         | Auto-declaração raça/cor (1-5) |
+| `zip_code`                  | String          | Sim         | CEP (somente dígitos)          |
+| `had_previous_complication` | Boolean?        | Não         | Complicação anterior           |
+| `birth_date`                | Date            | Sim         | Data de nascimento da gestante |
+| `created_at`                | DateTime        | Sim         | Criação do registro            |
+| `updated_at`                | DateTime        | Sim         | Última modificação             |
 
 ### 4.2 Tabela `user_locations`
 
-| Coluna | Tipo | Obrigatório | Descrição |
-|--------|------|------------|-----------|
-| `id` | UUID | Sim | PK |
-| `user_id` | UUID | Sim | FK → users.id (CASCADE DELETE) |
-| `city` | String | Sim | Município (via ViaCEP) |
-| `uf` | VarChar(2) | Sim | UF (via ViaCEP) |
-| `region` | String? | Não | Região do Brasil |
-| `ibge_code` | String? | Não | Código IBGE do município |
-| `created_at` | DateTime | Sim | Data de criação |
+| Coluna       | Tipo       | Obrigatório | Descrição                      |
+| ------------ | ---------- | ----------- | ------------------------------ |
+| `id`         | UUID       | Sim         | PK                             |
+| `user_id`    | UUID       | Sim         | FK → users.id (CASCADE DELETE) |
+| `city`       | String     | Sim         | Município (via ViaCEP)         |
+| `uf`         | VarChar(2) | Sim         | UF (via ViaCEP)                |
+| `region`     | String?    | Não         | Região do Brasil               |
+| `ibge_code`  | String?    | Não         | Código IBGE do município       |
+| `created_at` | DateTime   | Sim         | Data de criação                |
 
 ---
 
@@ -292,11 +357,11 @@ npm run test:watch    # Watch mode
 
 ### Variáveis de Ambiente
 
-| Variável | Obrigatória | Descrição |
-|----------|------------|-----------|
-| `DATABASE_URL` | Sim | Connection string PostgreSQL |
-| `JWT_SECRET` | Sim | Chave de assinatura JWT (mínimo 32 bytes) |
-| `PORT` | Não | Porta da API (padrão: 3000) |
+| Variável       | Obrigatória | Descrição                                 |
+| -------------- | ----------- | ----------------------------------------- |
+| `DATABASE_URL` | Sim         | Connection string PostgreSQL              |
+| `JWT_SECRET`   | Sim         | Chave de assinatura JWT (mínimo 32 bytes) |
+| `PORT`         | Não         | Porta da API (padrão: 3000)               |
 
 ### Docker Compose
 
@@ -313,17 +378,17 @@ npm run start:dev             # Inicia API em modo watch
 
 ## 9. Dependências Principais
 
-| Pacote | Versão | Finalidade |
-|--------|--------|-----------|
-| `@nestjs/core` | ^11.0.1 | Framework principal |
-| `@nestjs/jwt` | ^11.0.2 | Geração e validação de JWT |
-| `@nestjs/passport` | ^11.0.5 | Estratégia de autenticação |
-| `passport-jwt` | ^4.0.1 | Estratégia JWT para Passport |
-| `@prisma/client` | ^7.6.0 | ORM e client do banco |
-| `bcrypt` | ^6.0.0 | Hash de senhas |
-| `class-validator` | ^0.15.1 | Validação de DTOs |
-| `class-transformer` | ^0.5.1 | Transformação de objetos |
-| `@nestjs/config` | ^4.0.3 | Gestão de variáveis de ambiente |
+| Pacote              | Versão  | Finalidade                      |
+| ------------------- | ------- | ------------------------------- |
+| `@nestjs/core`      | ^11.0.1 | Framework principal             |
+| `@nestjs/jwt`       | ^11.0.2 | Geração e validação de JWT      |
+| `@nestjs/passport`  | ^11.0.5 | Estratégia de autenticação      |
+| `passport-jwt`      | ^4.0.1  | Estratégia JWT para Passport    |
+| `@prisma/client`    | ^7.6.0  | ORM e client do banco           |
+| `bcrypt`            | ^6.0.0  | Hash de senhas                  |
+| `class-validator`   | ^0.15.1 | Validação de DTOs               |
+| `class-transformer` | ^0.5.1  | Transformação de objetos        |
+| `@nestjs/config`    | ^4.0.3  | Gestão de variáveis de ambiente |
 
 ---
 
@@ -332,9 +397,9 @@ npm run start:dev             # Inicia API em modo watch
 - [ ] Implementar refresh token (ver [doc 13 — Segurança](./13-Especificacoes_de_Seguranca.md))
 - [ ] Adicionar Helmet.js e configuração de CORS explícita
 - [ ] Adicionar rate limiting com `@nestjs/throttler`
-- [ ] Implementar endpoint `POST /questionnaire` para triagem de risco gestacional
+- [x] Implementar endpoints de `pregnancies` e `questionnaires` (CRUD básico)
 - [ ] Implementar integração RabbitMQ para envio de dados ao Worker de IA
-- [ ] Implementar endpoint `GET /classification/result` para retornar cluster IA
+- [ ] Atualizar status da gestação e salvar retorno do cluster IA após resposta do Worker
 - [ ] Adicionar endpoints LGPD: `GET /users/my-data`, `DELETE /users/me`
 - [ ] Configurar versionamento de API (`/v1/`)
 - [ ] Implementar logging estruturado com contexto de segurança
