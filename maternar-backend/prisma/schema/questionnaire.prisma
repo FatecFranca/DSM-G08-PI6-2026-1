@@ -7,7 +7,11 @@ model QuestionnaireResponse {
   antiHivFlag         Int      @map("anti_hiv_flag") @db.SmallInt
   clusterId           Int?     @map("cluster_id") @db.SmallInt
   clusterName         String?  @map("cluster_name") @db.VarChar(60)
+  riskLevel           String?  @map("risk_level") @db.VarChar(20)
+  hexColor            String?  @map("hex_color") @db.VarChar(7)
   calculatedImc       Decimal? @map("calculated_imc") @db.Decimal(5, 2)
+  recommendations     Json?    @map("recommendations")
+  metrics             Json?    @map("metrics")
   responseDate        DateTime @default(now()) @map("response_date") @db.Timestamptz
 
   pregnancy Pregnancy @relation(fields: [pregnancyId], references: [id], onDelete: Cascade)

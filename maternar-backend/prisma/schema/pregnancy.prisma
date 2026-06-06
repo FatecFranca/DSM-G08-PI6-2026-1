@@ -1,13 +1,15 @@
 model Pregnancy {
-  id               String          @id @default(uuid()) @db.Uuid
-  userId           String          @map("user_id") @db.Uuid
-  dumStartDate     DateTime?       @map("dum_start_date") @db.Date
-  estimatedDueDate DateTime?       @map("estimated_due_date") @db.Date
-  status           PregnancyStatus @default(ACTIVE)
-  clusterId        Int?            @map("cluster_id") @db.SmallInt
-  clusterName      String?         @map("cluster_name") @db.VarChar(60)
-  createdAt        DateTime        @default(now()) @map("created_at")
-  updatedAt        DateTime        @updatedAt @map("updated_at")
+  id                 String          @id @default(uuid()) @db.Uuid
+  userId             String          @map("user_id") @db.Uuid
+  dumStartDate       DateTime?       @map("dum_start_date") @db.Date
+  estimatedDueDate   DateTime?       @map("estimated_due_date") @db.Date
+  status             PregnancyStatus @default(ACTIVE)
+  currentClusterId   Int?            @map("current_cluster_id") @db.SmallInt
+  currentClusterName String?         @map("current_cluster_name") @db.VarChar(60)
+  currentRiskLevel   String?         @map("current_risk_level") @db.VarChar(20)
+  currentHexColor    String?         @map("current_hex_color") @db.VarChar(7)
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
 
   user           User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   questionnaires QuestionnaireResponse[]

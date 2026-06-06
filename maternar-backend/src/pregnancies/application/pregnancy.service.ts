@@ -47,7 +47,7 @@ export class PregnancyService {
         dumStartDate: true,
         estimatedDueDate: true,
         status: true,
-        clusterName: true,
+        currentClusterName: true,
         createdAt: true,
       },
     });

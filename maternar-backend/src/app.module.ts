@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ViacepModule } from './integrations/viacep/viacep.module';
 import { PregnancyModule } from './pregnancies/pregnancy.module';
 import { QuestionnaireModule } from './questionnaires/questionnaire.module';
+import { RabbitmqModule } from './integrations/rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { QuestionnaireModule } from './questionnaires/questionnaire.module';
     AuthModule,
     PregnancyModule,
     QuestionnaireModule,
+    RabbitmqModule,
   ],
   controllers: [],
   providers: [],

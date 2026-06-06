@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  private readonly jwtExpirationTimeInSeconds = 60;
+  private readonly jwtExpirationTimeInSeconds = 604800;
 
   constructor(
     private readonly userService: UserService,

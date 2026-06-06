@@ -23,7 +23,7 @@ export class QuestionnaireController {
     @Param('pregnancyId', ParseUUIDPipe) pregnancyId: string,
     @Body() dto: CreateQuestionnaireDto,
   ) {
-    return this.questionnaireService.createPartialResponse(
+    return this.questionnaireService.submitQuestionnaire(
       userId,
       pregnancyId,
       dto,
