@@ -194,6 +194,19 @@ maternar_worker | Worker aguardando mensagens em 'maternar.classificar'...
 
 ---
 
+## Infraestrutura de Mensageria — RabbitMQ
+
+O broker RabbitMQ está hospedado em uma instância **Digital Ocean** e é compartilhado entre os serviços do projeto.
+
+| Acesso | Endereço |
+| :----- | :------- |
+| **Painel de Gerenciamento (Management UI)** | [http://206.189.173.19:15672](http://206.189.173.19:15672) |
+| **Protocolo AMQP** | `206.189.173.19:5672` |
+
+> **Atenção:** As credenciais de acesso ao broker devem ser configuradas via variáveis de ambiente (`.env`). Nunca comitar usuário/senha no repositório.
+
+---
+
 ## API de Inferência
 
 ### Via HTTP (desenvolvimento)
@@ -308,9 +321,9 @@ Antes de qualquer deploy em produção, revisar o checklist de segurança nesse 
 
 | Nome                     | Papel                                |
 | ------------------------ | ------------------------------------ |
-| Gabriel Araujo de Pádua  | Backend · Pipeline de Dados · DevOps |
+| Gabriel Araujo de Pádua  | Backend · Pipeline de Dados          |
 | Guilherme Dilio de Souza | Backend · Arquitetura                |
-| Sheila Alves de Araujo   | Frontend · UX                        |
+| Sheila Alves de Araujo   | Frontend · UX · DevOps               |
 
 ---
 
