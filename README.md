@@ -338,3 +338,60 @@ Antes de qualquer deploy em produção, revisar o checklist de segurança nesse 
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-3.13-orange?logo=rabbitmq)
 ![Docker](https://img.shields.io/badge/Docker-Compose-blue?logo=docker)
 ![Prisma](https://img.shields.io/badge/Prisma-7-white?logo=prisma)
+
+---
+
+## Integrações — N8N
+
+O projeto utiliza o **N8N** como plataforma de automação para monitoramento de infraestrutura e notificações em tempo real.
+
+### Monitoramento de Infraestrutura
+
+Um workflow automatizado verifica a disponibilidade dos serviços a cada 5 minutos e envia alertas via **Telegram** caso algum serviço fique fora do ar.
+
+**Serviços monitorados:**
+
+| Serviço | Endereço monitorado |
+| :--- | :--- |
+| 🐇 RabbitMQ Management | `http://206.189.173.19:15672` |
+| 🖥️ NestJS API | `http://206.189.173.19:3000` |
+
+**Fluxo do workflow:**
+
+```
+Schedule Trigger (a cada 5 min)
+        ↓
+Check RabbitMQ + Check NestJS (HTTP Request)
+        ↓
+Verificar status (Code)
+        ↓
+Alerta de falhas (IF)
+        ↓              ↓
+Telegram (alerta)   Sem ação (tudo online)
+```
+
+**Exemplos de notificação:**
+
+Quando tudo está online:
+```
+✅ Maternar - Infraestrutura OK
+
+🐇 RabbitMQ: ✅ Online
+🖥️ NestJS API: ✅ Online
+
+Verificado em 08/06/2026, 15:30:00
+```
+
+Quando há falha:
+```
+🚨 Maternar - ALERTA DE SERVIÇO
+
+🐇 RabbitMQ: 🔴 Offline
+🖥️ NestJS API: ✅ Online
+
+⚠️ RabbitMQ fora do ar!
+
+Verificado em 08/06/2026, 15:30:00
+```
+
+> O N8N está hospedado em [n8n.gapsaa.com.br](https://n8n.gapsaa.com.br). As credenciais de acesso são gerenciadas internamente pela equipe.
